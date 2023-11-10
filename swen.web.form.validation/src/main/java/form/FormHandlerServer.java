@@ -55,7 +55,7 @@ public class FormHandlerServer {
 			Weather weather = objectMapper.readValue(s, Weather.class);
 			Logger.info(res.code() + ": " + weather.current.temp_c);
 
-			cts.result("" + weather.current.temp_c + " bei " + weather.current.condition.text);
+			cts.result("" + weather.current.condition.text + " bei " + weather.current.temp_c);
 
 		});
 
@@ -82,7 +82,7 @@ public class FormHandlerServer {
 			Logger.info(res.code() + ": " + weather.current.temp_c);
 
 			// Ergebnis vom Service als Plain Text
-			cts.result("" + weather.current.temp_c + " bei " + weather.current.condition.text);
+			cts.result("" + weather.current.condition.text + " bei " +  weather.current.temp_c);
 
 		});
 
