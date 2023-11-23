@@ -1,5 +1,8 @@
 package form;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.tinylog.Logger;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -14,6 +17,8 @@ import okhttp3.ResponseBody;
 
 public class FormHandlerServer {
 
+	private static final Map<String, Weather> weatherDataMap = new HashMap<>();
+
 	public static void main(String[] args) {
 		// start your own server
 		Javalin app = Javalin.create(config -> {
@@ -21,19 +26,29 @@ public class FormHandlerServer {
 		}).start(7001); // using port 7001
 
 		// adding rest endpoints to server
-		app.get("/patient", new AppHandler(RouteResponse.JSON));
 		app.get("/patient2", new AppHandler(RouteResponse.HTML));
 
 		/*
 		 * TODO Implementieren Sie einen REST End point zum Erfassen von Patienten.
 		 * Jeder Patient wird in einer *lokalen* Datenbank (Java-Map) abgespeichert. Die
-		 * Patientennummer dient dabei als identizierende Information. 
-		 * Der Rest End Point benutzt die POST HTTP-Methode. 
+		 * Patientennummer dient dabei als identizierende Information.
+		 * Der Rest End Point benutzt die POST HTTP-Methode.
 		 * 
 		 * 
 		 */
+		app.post("/patient", ctx -> {
+			String firstName = ctx.formParam("firstName");
+			String lastName = ctx.formParam("lastName");
+			int age = Integer.parseInt(ctx.formParam("age"));
+			String gender = ctx.formParam("gender");
+			String diagnosis = ctx.formParam("diagnosis");
 
-		 // Demo Rest Endpoint zur Abfrage des aktuellen Wetters in Konstanz
+			// Verarbeite die Formulardaten, z.B., speichere sie in einer Datenbank
+
+			ctx.result("Patient erstellt: " + firstName + " " + lastName);
+		});
+
+		// Demo Rest Endpoint zur Abfrage des aktuellen Wetters in Konstanz
 		app.get("/weather", cts -> {
 			OkHttpClient client = new OkHttpClient();
 
@@ -82,8 +97,9 @@ public class FormHandlerServer {
 			Logger.info(res.code() + ": " + weather.current.temp_c);
 
 			// Ergebnis vom Service als Plain Text
-			cts.result("" + weather.current.condition.text + " bei " +  weather.current.temp_c);
-
+			cts.result("" + weather.current.condition.text + " bei " + weather.current.temp_c
+					+ " bei der Luftfeutchtigkeit : " + weather.current.humidity);
+			weatherDataMap.put(city, weather);
 		});
 
 		/**
@@ -113,6 +129,7 @@ class Weather {
 class Current {
 	public String temp_c;
 	public Condition condition;
+	public int humidity;
 }
 
 class Condition {
