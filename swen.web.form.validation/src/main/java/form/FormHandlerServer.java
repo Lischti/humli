@@ -1,6 +1,8 @@
 package form;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.tinylog.Logger;
@@ -17,35 +19,54 @@ import okhttp3.ResponseBody;
 
 public class FormHandlerServer {
 
-	private static final Map<String, Weather> weatherDataMap = new HashMap<>();
-
 	public static void main(String[] args) {
 		// start your own server
 		Javalin app = Javalin.create(config -> {
 			config.staticFiles.add("/pub", Location.CLASSPATH);
 		}).start(7001); // using port 7001
 
-		// adding rest endpoints to server
-		app.get("/patient2", new AppHandler(RouteResponse.HTML));
+		final Map<String, Weather> weatherDataMap = new HashMap<>();
+		ArrayList<Patient> db = new ArrayList<Patient>();
 
-		/*
-		 * TODO Implementieren Sie einen REST End point zum Erfassen von Patienten.
-		 * Jeder Patient wird in einer *lokalen* Datenbank (Java-Map) abgespeichert. Die
-		 * Patientennummer dient dabei als identizierende Information.
-		 * Der Rest End Point benutzt die POST HTTP-Methode.
-		 * 
-		 * 
-		 */
+		// adding rest endpoints to server
+
 		app.post("/patient", ctx -> {
-			String firstName = ctx.formParam("firstName");
-			String lastName = ctx.formParam("lastName");
-			int age = Integer.parseInt(ctx.formParam("age"));
-			String gender = ctx.formParam("gender");
-			String diagnosis = ctx.formParam("diagnosis");
+
+			Patient patient = new Patient(ctx.formParam("firstName"), ctx.formParam("lastName"),
+					Integer.parseInt(ctx.formParam("age")),
+					ctx.formParam("gender"), ctx.formParam("diagnosis"));
 
 			// Verarbeite die Formulardaten, z.B., speichere sie in einer Datenbank
 
-			ctx.result("Patient erstellt: " + firstName + " " + lastName);
+			ctx.result("Patient erstellt: " + ctx.formParam("firstName") + " " + ctx.formParam("lastName"));
+
+			db.add(patient);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+			String patientJson = objectMapper.writeValueAsString(patient);
+
+			ctx.result(patientJson);
+		});
+
+		app.get("/patient2", ctx -> {
+			List<Patient> result = new ArrayList<>();
+			String seachredLastName = ctx.formParam("lastName");
+
+			Logger.info("Hello :" + seachredLastName);
+			validateStringLength(seachredLastName);
+
+			for (Patient patient : db) {
+				if (patient.getLastName().equalsIgnoreCase(seachredLastName)) {
+					result.add(patient);
+					Logger.info(patient.getLastName());
+				}
+
+			}
+
+			ObjectMapper objectMapper = new ObjectMapper();
+			String patientJson = objectMapper.writeValueAsString(result);
+
+			ctx.result(patientJson);
 		});
 
 		// Demo Rest Endpoint zur Abfrage des aktuellen Wetters in Konstanz
@@ -111,6 +132,23 @@ public class FormHandlerServer {
 		}).error(404, ctx -> {
 			ctx.result("Generic 404 message: " + ctx.url());
 		});
+
+		app.get("/getall", cts -> {
+			cts.result(db.toString());
+		});
+	}
+
+	/**
+	 * @param value
+	 * @throws InvalidStringLengthException
+	 */
+	private static void validateStringLength(String value) throws InvalidStringLengthException {
+		if (value != null && value.length() < 2) {
+			throw new InvalidStringLengthException();
+		}
+	}
+
+	private static class InvalidStringLengthException extends Exception {
 	}
 
 }

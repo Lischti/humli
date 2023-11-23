@@ -23,7 +23,8 @@ public class AppHandler implements Handler {
 		if (state.compareTo(RouteResponse.HTML) == 0) {
 			db.add(LocalDateTime.now() + "");
 
-			// TODO Ausgabe in HTML verbessern: informativer und visuell angemessener Gestalten
+			// TODO Ausgabe in HTML verbessern: informativer und visuell angemessener
+			// Gestalten
 			String res = "";
 			for (String s : db) {
 				res += (s + " ");
@@ -31,8 +32,8 @@ public class AppHandler implements Handler {
 
 			ctx.html("<h2>Software Engineering 1</h2><hp>Request at " + LocalDateTime.now() + "</p><p>" + res + "</p>");
 		} else {
-			
-			ctx.json(new Patient("Mike", "Constance"));
+
+			// ctx.json(new Patient("Mike", "Constance"));
 		}
 	}
 
@@ -40,11 +41,48 @@ public class AppHandler implements Handler {
 
 class Patient {
 
-	public String name;
-	public String city;
+	private static int counter = 1;
 
-	public Patient(String name, String city) {
-		this.name = name;
-		this.city = city;
+	public int patientennummer;
+	public String firstName;
+	public String lastName;
+	public int age;
+	public String gender;
+	public String diagnosis;
+
+	// Konstruktor ohne Patientennummer-Parameter
+	public Patient(String firstName, String lastName, int age, String gender, String diagnosis) {
+		this.patientennummer = counter++;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.age = age;
+		this.gender = gender;
+		this.diagnosis = diagnosis;
+	}
+
+	// Getter für die Patientennummer
+	public int getPatientennummer() {
+		return patientennummer;
+	}
+
+	// Weitere Getter für die anderen Attribute
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public String getDiagnosis() {
+		return diagnosis;
 	}
 }
