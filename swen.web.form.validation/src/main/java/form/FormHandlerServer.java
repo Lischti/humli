@@ -29,6 +29,7 @@ public class FormHandlerServer {
 		ArrayList<Patient> db = new ArrayList<Patient>();
 
 		// adding rest endpoints to server
+		Patient a = new Patient()
 
 		app.post("/patient", ctx -> {
 
@@ -50,7 +51,7 @@ public class FormHandlerServer {
 
 		app.get("/patient2", ctx -> {
 			List<Patient> result = new ArrayList<>();
-			String seachredLastName = ctx.formParam("lastName");
+			String seachredLastName = ctx.queryParam("lastName");
 
 			Logger.info("Hello :" + seachredLastName);
 			validateStringLength(seachredLastName);
